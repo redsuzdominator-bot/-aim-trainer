@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>PRO AIM TRAINER FPS - MEGA SHOP UPDATE</title>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <style>
+        body { text-align: center; font-family: 'Segoe UI', sans-serif; background: #12141a; color: white; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; user-select: none; }
+        
+        #mainContainer { display: flex; gap: 30px; align-items: flex-start; margin-top: 20px; }
+
+        #menu, #duelLobby { background: #1e222d; padding: 30px; border-radius: 20px; box-shadow: 0 0 30px rgba(0, 210, 255, 0.1); border: 2px solid #00d2ff; width: 450px; position: relative; z-index: 10; }
+        
+        /* Topka Online */
+        #leaderboardPanel { background: #1e222d; padding: 20px; border-radius: 20px; box-shadow: 0 0 30px rgba(255, 204, 0, 0.1); border: 2px solid #ffcc00; width: 300px; display: flex; flex-direction: column; }
+        .lb-title { color: #ffcc00; font-size: 22px; font-weight: bold; margin-bottom: 15px; text-shadow: 0 0 10px #ffcc00; text-transform: uppercase; }
+        
+        #lb-content { display: flex; flex-direction: column; gap: 5px; }
+        .lb-row { display: flex; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid #12141a; font-size: 16px; background: rgba(0,0,0,0.2); border-radius: 5px; transition: transform 0.3s ease, background 0.3s; }
+        .lb-row:hover { transform: scale(1.02); background: rgba(255,255,255,0.05); }
+        .lb-row:nth-child(1) { color: #ffd700; font-weight: bold; font-size: 18px; border: 1px solid #ffd700; background: rgba(255, 215, 0, 0.1); }
+        .lb-row:nth-child(2) { color: #c0c0c0; font-weight: bold; }
+        .lb-row:nth-child(3) { color: #cd7f32; font-weight: bold; }
+        .lb-score { color: #00ffcc; font-weight: bold; }
+        .lb-highlight { background: rgba(0, 255, 204, 0.2) !important; border: 1px solid #00ffcc !important; border-radius: 5px; }
+
+        #descBox { background: #12141a; padding: 15px; border-radius: 10px; border: 1px solid #ff0055; margin-top: 10px; font-size: 14px; min-height: 20px; }
+        
+        .btn-pro { background: linear-gradient(45deg, #ff0055, #ff5500); color: white; border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 8px; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; font-size: 14px; width: 90%; }
+        .btn-pro:hover { transform: scale(1.05); box-shadow: 0 0 15px #ff0055; }
+        .btn-ranked { background: linear-gradient(45deg, #ffcc00, #ff6600); color: black; font-size: 16px; border: 2px solid #fff; }
+        .btn-ranked:hover { box-shadow: 0 0 20px #ffcc00; }
+        .btn-duel { background: linear-gradient(45deg, #00d2ff, #0066ff); }
+        .btn-duel:hover { box-shadow: 0 0 15px #00d2ff; }
+        
+        /* ZBROJOWNIA */
+        .shop-box { background: #171a21; border: 2px solid #3a4256; border-radius: 15px; padding: 20px; margin-top: 20px; text-align: left; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+        .shop-box h3 { text-align: center; margin-top: 0; color: #fff; text-shadow: 0 0 10px #00d2ff; font-size: 20px; letter-spacing: 2px; border-bottom: 2px solid #3a4256; padding-bottom: 10px; }
+        .skin-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #24283b; transition: 0.3s; border-radius: 8px; margin-bottom: 5px; background: rgba(255,255,255,0.02); }
+        .skin-item:hover { background: rgba(255,255,255,0.05); transform: translateX(5px); }
+        .skin-name { font-size: 15px; font-weight: bold; }
+        .skin-price { font-size: 12px; opacity: 0.7; margin-left: 5px; }
+
+        .rarity-common { color: #a0aabf; }
+        .rarity-gold { color: #ffcc00; text-shadow: 0 0 5px rgba(255, 204, 0, 0.5); }
+        .rarity-neon { color: #00ffcc; text-shadow: 0 0 5px rgba(0, 255, 204, 0.5); }
+        .rarity-galaxy { color: #d633ff; text-shadow: 0 0 8px rgba(214, 51, 255, 0.6); }
+        .rarity-legendary { color: #ff0055; text-shadow: 0 0 10px rgba(255, 0, 85, 0.7); font-size: 16px; }
+        .rarity-god { background: linear-gradient(90deg, #ffcc00, #ff5500, #ff0055); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 15px rgba(255, 100, 0, 0.5); font-size: 17px; }
+
+        .skin-btn { border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; min-width: 90px; }
+        .skin-btn:active { transform: scale(0.95); }
+        .btn-theme-default { background: #3a4256; color: #fff; }
+        .btn-theme-default:hover { background: #505a75; }
+        .btn-theme-gold { background: #ffcc00; color: #000; box-shadow: 0 0 10px rgba(255, 204, 0, 0.4); }
+        .btn-theme-gold:hover { background: #ffe066; box-shadow: 0 0 15px rgba(255, 204, 0, 0.8); }
+        .btn-theme-neon { background: #00ffcc; color: #000; box-shadow: 0 0 10px rgba(0, 255, 204, 0.4); }
+        .btn-theme-neon:hover { background: #66ffeb; box-shadow: 0 0 15px rgba(0, 255, 204, 0.8); }
+        .btn-theme-galaxy { background: #9900ff; color: #fff; box-shadow: 0 0 10px rgba(153, 0, 255, 0.4); }
+        .btn-theme-galaxy:hover { background: #b84dff; box-shadow: 0 0 15px rgba(153, 0, 255, 0.8); }
+        .btn-theme-blaster { background: #ff0055; color: #fff; box-shadow: 0 0 10px rgba(255, 0, 85, 0.4); }
+        .btn-theme-blaster:hover { background: #ff3377; box-shadow: 0 0 15px rgba(255, 0, 85, 0.8); }
+        .btn-theme-dragon { background: linear-gradient(45deg, #ff5500, #ffcc00); color: #000; box-shadow: 0 0 15px rgba(255, 85, 0, 0.6); border: 1px solid #fff; }
+        .btn-theme-dragon:hover { filter: brightness(1.2); box-shadow: 0 0 20px rgba(255, 85, 0, 1); }
+        .btn-equipped { background: #12141a !important; color: #505a75 !important; box-shadow: none !important; border: 1px solid #3a4256 !important; cursor: not-allowed; transform: none !important; }
+
+        #codeBox { background: #1e222d; border: 2px dashed #ff0055; border-radius: 10px; padding: 15px; margin-top: 20px; width: 780px; display: flex; justify-content: center; align-items: center; gap: 15px; box-shadow: 0 0 20px rgba(255,0,85,0.1); }
+        #promoCode { width: 250px; margin: 0; border-color: #ff0055; }
+        .btn-code { background: #ff0055; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-code:hover { background: #ff5500; box-shadow: 0 0 10px #ff0055; }
+
+        #gameWrapper { display: none; flex-direction: column; align-items: center; width: 100%; }
+        #vsHeader { display: flex; justify-content: space-between; width: 800px; margin-bottom: 10px; font-size: 24px; font-weight: bold; }
+        .player-side { background: #1e222d; padding: 10px 20px; border-radius: 10px; border: 2px solid #00ffcc; color: #00ffcc; width: 40%; }
+        .opp-side { border-color: #ff0055; color: #ff0055; }
+
+        #gameArea { width: 800px; height: 500px; border: 4px solid #00d2ff; margin: 0 auto; position: relative; background: #12141a; overflow: hidden; cursor: crosshair; box-shadow: inset 0 0 50px rgba(0,0,0,0.8); }
+        
+        #countdownOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; flex-direction: column; }
+        #countdownText { font-size: 120px; color: #ffcc00; text-shadow: 0 0 30px #ff0055; margin: 0; animation: popIn 1s infinite; }
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+
+        #gun-container { position: absolute; bottom: -10px; right: 180px; pointer-events: none; z-index: 5; }
+        #fps-gun { width: 180px; height: auto; transition: transform 0.04s ease-out; transform-origin: bottom center; }
+        .recoil { transform: translateY(-25px) scale(1.15) rotate(-2deg); }
+
+        .target { width: 40px; height: 40px; background: radial-gradient(circle, #00d2ff, #0066ff); position: absolute; border-radius: 8px; box-shadow: 0 0 10px #00d2ff; z-index: 2; }
+        .muzzle-flash { position: absolute; width: 60px; height: 60px; background: radial-gradient(circle, #fff, #ffcc00, transparent); border-radius: 50%; pointer-events: none; animation: flash 0.1s forwards; z-index: 3; }
+        @keyframes flash { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
+
+        #uiBar { font-size: 18px; margin-top: 10px; font-weight: bold; background: #1e222d; padding: 10px 20px; border-radius: 10px; border: 1px solid #00d2ff; width: 760px; display: flex; justify-content: space-between; align-items: center; }
+        input, select { background: #12141a; color: white; border: 1px solid #00d2ff; padding: 10px; border-radius: 5px; text-align: center; font-size: 16px; margin-bottom: 10px; width: 80%; }
+        
+        /* Zablokowany Nick Input */
+        input:disabled { background: #0d0f13; border-color: #555; color: #888; cursor: not-allowed; text-transform: uppercase; font-weight: bold; }
+        .locked-badge { font-size: 10px; color: #ff0055; text-transform: uppercase; margin-top: -5px; margin-bottom: 10px; display: block; font-weight: bold; }
+
+        .balance-text { color: #ffcc00; font-size: 22px; font-weight: bold; margin-bottom: 15px; }
+        .mode-badge { background: #ffcc00; color: black; padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 14px; }
+        .combo-text { color: #ff0055; text-shadow: 0 0 8px #ff0055; font-size: 22px; }
+        .score-text { color: #00ffcc; font-size: 20px; }
+    </style>
+</head>
+<body>
+
+    <div id="mainContainer">
+        <!-- MENU GŁÓWNE -->
+        <div id="menu">
+            <h1>PRO AIM TRAINER</h1>
+            
+            <div class="balance-text">Punkty: <span id="totalBalance">0</span></div>
+            
+            <!-- System wpisywania Nicku -->
+            <input type="text" id="username" placeholder="Wpisz swój Nick (TYLKO RAZ!)">
+            <span id="nickLockedInfo" class="locked-badge" style="display:none;">🔒 NICK ZABLOKOWANY NA STAŁE</span>
+            <br>
+
+            <label style="color: #00d2ff; font-weight: bold; font-size: 14px; display: block; margin-top: 10px; margin-bottom: 5px;">WYBIERZ POZIOM TRUDNOŚCI:</label>
+            <select id="diffGlobal" onchange="updateDesc()">
+                <option value="1000">Łatwy</option>
+                <option value="700" selected>Średni</option>
+                <option value="400">Trudny</option>
+                <option value="impossible">Niemożliwy</option>
+            </select>
+            <div id="descBox">Średni: Umiarkowane tempo, cele znikają po 0.5s.</div><br>
+            
+            <button class="btn-pro" onclick="startGame('unranked')">TRENING</button>
+            <button class="btn-pro btn-ranked" onclick="startGame('ranked')">RANKED (TOPKA)</button>
+            <button class="btn-pro btn-duel" onclick="showOnlineMenu()">TRYB ONLINE (DUEL)</button>
+
+            <div id="duel-options" style="display:none; margin-top:10px; padding-top:10px; border-top: 1px solid #00d2ff;">
+                <button class="btn-pro btn-duel" onclick="initDuelHost()">STWÓRZ POKÓJ</button>
+                <p id="roomCodeDisplay" style="color:#00d2ff; font-weight:bold;"></p>
+                <input type="text" id="joinCode" placeholder="Wpisz kod pokoju"><br>
+                <button class="btn-pro btn-duel" onclick="joinDuelRoom()">DOŁĄCZ DO POKOJU</button>
+            </div>
+            
+            <!-- ZBROJOWNIA -->
+            <div class="shop-box">
+                <h3>🛒 ZBROJOWNIA VIP</h3>
+                
+                <div class="skin-item">
+                    <div>
+                        <span class="skin-name rarity-common">Klasyczny Pistolet</span>
+                    </div>
+                    <button class="skin-btn" id="btn-skin-default" onclick="buyOrEquip('default')">ŁADOWANIE...</button>
+                </div>
+
+                <div class="skin-item">
+                    <div>
+                        <span class="skin-name rarity-gold">Złoty Rewolwer</span>
+                        <span class="skin-price">150 PKT</span>
+                    </div>
+                    <button class="skin-btn" id="btn-skin-gold" onclick="buyOrEquip('gold')">ŁADOWANIE...</button>
+                </div>
+
+                <div class="skin-item">
+                    <div>
+                        <span class="skin-name rarity-neon">Neonowy Pistolet</span>
+                        <span class="skin-price">300 PKT</span>
+                    </div>
+                    <button class="skin-btn" id="btn-skin-neon" onclick="buyOrEquip('neon')">ŁADOWANIE...</button>
+                </div>
+                
+                <div class="skin-item">
+                    <div>
+                        <span class="skin-name rarity-galaxy">🌌 Galaktyczny Karabin</span>
+                        <span class="skin-price">1000 PKT</span>
+                    </div>
+                    <button class="skin-btn" id="btn-skin-galaxy" onclick="buyOrEquip('galaxy')">ŁADOWANIE...</button>
+                </div>
+
+                <div class="skin-item">
+                    <div>
+                        <span class="skin-name rarity-legendary">🔫 Laserowy Blaster</span>
+                        <span class="skin-price">2500 PKT</span>
+                    </div>
+                    <button class="skin-btn" id="btn-skin-blaster" onclick="buyOrEquip('blaster')">ŁADOWANIE...</button>
+                </div>
+
+                <div class="skin-item">
+                    <div>
+                        <span class="skin-name rarity-god">🐉 Mityczny Smok</span>
+                        <span class="skin-price">5000 PKT</span>
+                    </div>
+                    <button class="skin-btn" id="btn-skin-dragon" onclick="buyOrEquip('dragon')">ŁADOWANIE...</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOPKA ONLINE UI -->
+        <div id="leaderboardPanel">
+            <div class="lb-title">🌍 TOPKA ONLINE</div>
+            <div id="lb-content"></div>
+            <p style="font-size: 11px; color: #888; margin-top: 15px;">Wbij więcej trafień w trybie Ranked, żeby zepchnąć kogoś w dół i zająć jego miejsce!</p>
+        </div>
+    </div>
+
+    <!-- PANELE KODÓW -->
+    <div id="codeBox">
+        <span style="font-weight: bold; color: #ff0055;">KODY PROMOCYJNE:</span>
+        <input type="text" id="promoCode" placeholder="Wpisz tajny kod...">
+        <button class="btn-code" onclick="redeemCode()">ODBIERZ</button>
+    </div>
+
+    <!-- LOBBY POJEDYNKU -->
+    <div id="duelLobby" style="display:none;">
+        <h2 style="color:#ffcc00;">POKÓJ POJEDYNKU</h2>
+        <h3 id="lobbyStatus">Oczekiwanie na gracza...</h3>
+        <div id="lobbySettings" style="opacity: 0.5; pointer-events: none;">
+            <label>Stawka (ile punktów ryzykujesz?)</label><br>
+            <input type="number" id="wagerAmount" value="10" min="0"><br>
+        </div>
+        <button class="btn-pro btn-ready" id="btnReady" onclick="toggleReady()" disabled>JESTEM GOTOWY</button>
+    </div>
+
+    <!-- OBSZAR GRY -->
+    <div id="gameWrapper">
+        <div id="uiBar">
+            <div><span id="modeDisplay" class="mode-badge">TRYB</span> Czas: <span id="timer">20</span>s </div>
+            <div class="score-text">Trafienia: <span id="score" style="font-weight:bold; font-size:26px;">0</span></div>
+            <div class="combo-text">COMBO: <span id="comboDisplay">0</span> <span style="font-size:14px; color:#fff;">(Max: <span id="maxComboDisplay">0</span>)</span></div>
+        </div>
+        
+        <div id="vsHeader" style="display:none;">
+            <div class="player-side">TWÓJ EKRAN<br>Wynik: <span id="duelMyScore" style="font-size:30px;">0</span></div>
+            <div style="font-size: 40px; margin-top:10px;">VS</div>
+            <div class="player-side opp-side">EKRAN PRZECIWNIKA<br>Wynik: <span id="oppScore" style="font-size:30px;">0</span></div>
+        </div>
+
+        <div id="gameArea" onmousedown="shootEffect(event)">
+            <div id="countdownOverlay"><h1 id="countdownText">3</h1></div>
+            <div id="gun-container">
+                <svg id="fps-gun" viewBox="0 0 200 200">
+                    <g id="model-default">
+                        <polygon points="70,190 130,190 120,110 80,110" fill="#1b1c1e" />
+                        <polygon points="80,110 120,110 110,40 90,40" fill="#2c2e35" />
+                        <polygon points="70,190 80,110 90,40 75,45" fill="#121315" />
+                        <rect x="98" y="34" width="4" height="6" fill="#00ffff" />
+                        <rect x="82" y="104" width="6" height="6" fill="#ff0055" />
+                        <rect x="112" y="104" width="6" height="6" fill="#ff0055" />
+                    </g>
+                    <g id="model-galaxy" style="display:none;">
+                        <path d="M 80,190 L 120,190 L 120,100 L 160,80 L 160,30 L 100,30 L 70,80 Z" fill="#1a0033" />
+                        <polygon points="100,30 110,-10 120,30" fill="#d633ff" />
+                        <circle cx="130" cy="50" r="6" fill="#00ffff" />
+                        <circle cx="90" cy="140" r="2" fill="#fff" />
+                        <circle cx="110" cy="160" r="1.5" fill="#fff" />
+                        <circle cx="100" cy="120" r="2.5" fill="#fff" />
+                        <path d="M 70,80 Q 50,130 80,190" fill="#9900ff" opacity="0.6"/>
+                    </g>
+                    <g id="model-blaster" style="display:none;">
+                        <rect x="85" y="100" width="30" height="100" fill="#222" rx="5"/>
+                        <rect x="65" y="50" width="70" height="50" fill="#333" rx="10"/>
+                        <rect x="75" y="60" width="50" height="30" fill="#00d2ff" />
+                        <circle cx="100" cy="75" r="15" fill="#fff" />
+                        <rect x="95" y="30" width="10" height="20" fill="#ff0055" />
+                    </g>
+                    <g id="model-dragon" style="display:none;">
+                        <path d="M 50,200 Q 100,100 160,60 L 140,20 Q 90,40 80,80 Q 30,120 50,200 Z" fill="#ff2a00"/>
+                        <path d="M 60,200 Q 100,120 140,70 L 120,40 Q 80,60 70,90 Q 40,130 60,200 Z" fill="#cc0000"/>
+                        <polygon points="160,60 180,30 150,45" fill="#ffcc00" />
+                        <polygon points="150,45 170,20 140,30" fill="#ff6600" />
+                        <circle cx="120" cy="50" r="5" fill="#fff" />
+                        <circle cx="122" cy="50" r="2" fill="#000" />
+                    </g>
+                </svg>
+            </div>
+        </div>
+    </div>
+    
+    <div id="results" style="display:none;">
+        <h1 id="duelResultText" style="font-size: 50px;"></h1>
+        <h2 id="msg"></h2>
+        <h3 id="comboResult" style="color: #ff0055;"></h3>
+        <button class="btn-pro" onclick="location.reload()">Wróć do Menu</button>
+    </div>
+
+    <script>
+        // Ładowanie zapisanej topki lub domyślnej
+        let savedLeaderboard = JSON.parse(localStorage.getItem('aim_leaderboard'));
+        let globalLeaderboard = savedLeaderboard || [
+            { name: "AimGod", score: 45, maxCombo: 25 },
+            { name: "ProGamer", score: 38, maxCombo: 15 },
+            { name: "NinjaPL", score: 32, maxCombo: 12 },
+            { name: "Snajper123", score: 25, maxCombo: 10 },
+            { name: "SzybkiZapal", score: 18, maxCombo: 5 }
+        ];
+
+        function renderLeaderboard(highlightName = null) {
+            const lbContent = document.getElementById('lb-content');
+            lbContent.innerHTML = "";
+            
+            // Tutaj dzieje się magia z "przerzucaniem" osób w dół
+            globalLeaderboard.sort((a, b) => b.score - a.score);
+            
+            const topPlayers = globalLeaderboard.slice(0, 6);
+            
+            topPlayers.forEach((player, index) => {
+                const row = document.createElement('div');
+                row.className = 'lb-row';
+                if(player.name === highlightName) row.classList.add('lb-highlight');
+                
+                let positionStr = index === 0 ? `👑 1.` : `${index + 1}.`;
+                row.innerHTML = `<span>${positionStr} ${player.name}</span> <span class="lb-score">${player.score} traf. (K: ${player.maxCombo})</span>`;
+                lbContent.appendChild(row);
+            });
+        }
+        renderLeaderboard();
+
+        let score = 0, combo = 0, maxCombo = 0, timeLeft = 20, timerInterval, playerName;
+        let activeTargets = 0, gameMode = 'unranked', peer, conn, isHost = false, myWager = 0, myReady = false, oppReady = false;
+        
+        let balance = parseInt(localStorage.getItem('aim_balance') || "0");
+        let ownedSkins = JSON.parse(localStorage.getItem('aim_skins') || '["default"]');
+        let equippedSkin = localStorage.getItem('aim_equipped') || 'default';
+        
+        // Sprawdzanie czy Nick jest już zablokowany (zapisany z poprzednich wejść)
+        let savedNick = localStorage.getItem('aim_nickname');
+        if (savedNick) {
+            document.getElementById('username').value = savedNick;
+            document.getElementById('username').disabled = true;
+            document.getElementById('nickLockedInfo').style.display = 'block';
+            playerName = savedNick;
+        }
+
+        const skinData = { default: 0, gold: 150, neon: 300, galaxy: 1000, blaster: 2500, dragon: 5000 };
+        document.getElementById('totalBalance').innerText = balance;
+
+        function updateShopButtons() {
+            for (let skinId in skinData) {
+                let btn = document.getElementById(`btn-skin-${skinId}`);
+                if (!btn) continue;
+                btn.className = 'skin-btn';
+
+                if (equippedSkin === skinId) {
+                    btn.innerText = "WYPOSAŻONO"; btn.classList.add(`btn-theme-${skinId}`); btn.classList.add('btn-equipped'); btn.disabled = true;
+                } else if (ownedSkins.includes(skinId)) {
+                    btn.innerText = "UŻYJ"; btn.classList.add(`btn-theme-${skinId}`); btn.disabled = false;
+                } else {
+                    btn.innerText = `KUP (${skinData[skinId]})`; btn.classList.add(`btn-theme-${skinId}`); btn.disabled = false;
+                }
+            }
+        }
+
+        function redeemCode() {
+            const input = document.getElementById('promoCode').value.trim().toUpperCase();
+            if (input === 'PROAIM500') {
+                if (localStorage.getItem('aim_code_proaim') === 'used') { alert("Ten kod został już wykorzystany!"); } 
+                else {
+                    balance += 500; localStorage.setItem('aim_code_proaim', 'used'); localStorage.setItem('aim_balance', balance);
+                    document.getElementById('totalBalance').innerText = balance; alert("KOD ZAAKCEPTOWANY! +500 pkt!");
+                }
+            } 
+            else if (input === 'SZEF10000') {
+                balance += 10000; localStorage.setItem('aim_balance', balance);
+                document.getElementById('totalBalance').innerText = balance; alert("👑 ODBLOKOWANO KOD ADMINA! +10 000 PKT! 👑");
+            } else { alert("Nieprawidłowy kod!"); }
+            document.getElementById('promoCode').value = "";
+        }
+
+        function updateDesc() {
+            const descs = { "1000": "Łatwy: Cele znikają po 0.7s.", "700": "Średni: Umiarkowane tempo, 0.5s.", "400": "Trudny: Szybko, 0.35s.", "impossible": "Niemożliwy: Błyskawica 0.3s!" };
+            document.getElementById('descBox').innerText = descs[document.getElementById('diffGlobal').value];
+        }
+
+        function showOnlineMenu() { document.getElementById('duel-options').style.display = 'block'; }
+
+        document.getElementById('gameArea').addEventListener('mousemove', (e) => {
+            const rect = document.getElementById('gameArea').getBoundingClientRect();
+            document.getElementById('gun-container').style.transform = `translateX(${(e.clientX - rect.left - 400) / 15}px)`;
+        });
+
+        function shootEffect(e) {
+            if(timeLeft <= 0) return;
+            const gunImg = document.getElementById('fps-gun');
+            gunImg.classList.add('recoil'); setTimeout(() => gunImg.classList.remove('recoil'), 70);
+            
+            const flash = document.createElement("div"); flash.className = "muzzle-flash";
+            const rect = document.getElementById("gameArea").getBoundingClientRect();
+            flash.style.left = (e.clientX - rect.left - 30) + "px"; flash.style.top = (e.clientY - rect.top - 30) + "px";
+            document.getElementById("gameArea").appendChild(flash); setTimeout(() => flash.remove(), 70);
+
+            if (!e.target.classList.contains("target")) { combo = 0; document.getElementById('comboDisplay').innerText = combo; }
+        }
+
+        function buyOrEquip(skinName) {
+            const price = skinData[skinName];
+            if (ownedSkins.includes(skinName)) { equipSkin(skinName); } 
+            else if (balance >= price) {
+                balance -= price; ownedSkins.push(skinName);
+                localStorage.setItem('aim_balance', balance); localStorage.setItem('aim_skins', JSON.stringify(ownedSkins));
+                equipSkin(skinName); document.getElementById('totalBalance').innerText = balance;
+            } else { alert("Za mało punktów! Zagraj rundę albo wpisz kod promocyjny."); }
+        }
+
+        function equipSkin(skinName) {
+            equippedSkin = skinName; localStorage.setItem('aim_equipped', skinName);
+            const gun = document.getElementById('fps-gun');
+            document.getElementById('model-default').style.display = 'none';
+            document.getElementById('model-galaxy').style.display = 'none';
+            document.getElementById('model-blaster').style.display = 'none';
+            document.getElementById('model-dragon').style.display = 'none';
+            gun.style.filter = "none";
+
+            if (skinName === 'default') { document.getElementById('model-default').style.display = 'block'; } 
+            else if (skinName === 'gold') { document.getElementById('model-default').style.display = 'block'; gun.style.filter = "sepia(1) saturate(7) hue-rotate(15deg) brightness(1.1) drop-shadow(0 0 10px #ffcc00)"; } 
+            else if (skinName === 'neon') { document.getElementById('model-default').style.display = 'block'; gun.style.filter = "hue-rotate(140deg) saturate(6) brightness(1.3) drop-shadow(0 0 15px #00ffcc)"; } 
+            else if (skinName === 'galaxy') { document.getElementById('model-galaxy').style.display = 'block'; gun.style.filter = "drop-shadow(0 0 15px #d633ff)"; } 
+            else if (skinName === 'blaster') { document.getElementById('model-blaster').style.display = 'block'; gun.style.filter = "drop-shadow(0 0 15px #ff0055)"; } 
+            else if (skinName === 'dragon') { document.getElementById('model-dragon').style.display = 'block'; gun.style.filter = "drop-shadow(0 0 20px #ff5500)"; }
+            updateShopButtons();
+        }
+
+        // LOGIKA BLOKOWANIA NICKU
+        function validateUsername() {
+            let inputField = document.getElementById('username');
+            if (inputField.disabled) return true; // Jak zablokowany, to znaczy że nick już mamy i puszczamy dalej
+            
+            playerName = inputField.value.trim();
+            if (!playerName) { alert("Wpisz swój nick, żeby móc zagrać!"); return false; }
+            
+            // Blokujemy nick po pierwszym wpisaniu i próbę gry
+            localStorage.setItem('aim_nickname', playerName);
+            inputField.disabled = true;
+            document.getElementById('nickLockedInfo').style.display = 'block';
+            return true;
+        }
+
+        function initDuelHost() {
+            if(!validateUsername()) return;
+            isHost = true; gameMode = 'duel';
+            let randId = "ROOM-" + Math.floor(1000 + Math.random() * 9000);
+            peer = new Peer(randId);
+            peer.on('open', (id) => document.getElementById('roomCodeDisplay').innerText = "TWÓJ KOD: " + id);
+            peer.on('connection', (connection) => { conn = connection; setupLobby(); });
+        }
+
+        function joinDuelRoom() {
+            if(!validateUsername()) return;
+            isHost = false; gameMode = 'duel';
+            let code = document.getElementById('joinCode').value.trim().toUpperCase();
+            peer = new Peer();
+            peer.on('open', () => { conn = peer.connect(code); setupLobby(); });
+        }
+
+        function setupLobby() {
+            document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('codeBox').style.display = 'none';
+            document.getElementById('duelLobby').style.display = 'block';
+            document.getElementById('lobbyStatus').innerText = isHost ? "Gracz dołączył!" : "Połączono!";
+            document.getElementById('lobbySettings').style.opacity = isHost ? "1" : "0.5";
+            document.getElementById('lobbySettings').style.pointerEvents = isHost ? "auto" : "none";
+            document.getElementById('btnReady').disabled = false;
+
+            if(isHost) { document.getElementById('wagerAmount').addEventListener('input', sendLobbyData); }
+
+            conn.on('data', (data) => {
+                if(data.type === 'lobbyData' && !isHost) { document.getElementById('wagerAmount').value = data.wager; myReady = false; oppReady = false; updateReadyUI(); }
+                if(data.type === 'ready') { oppReady = data.state; updateReadyUI(); if(isHost && myReady && oppReady) { conn.send({type: 'startCountdown'}); startCountdown(); } }
+                if(data.type === 'startCountdown') { startCountdown(); }
+                if(data.type === 'score') { document.getElementById('oppScore').innerText = data.value; }
+            });
+        }
+
+        function sendLobbyData() { myReady = false; oppReady = false; updateReadyUI(); conn.send({type: 'lobbyData', wager: document.getElementById('wagerAmount').value}); }
+
+        function toggleReady() {
+            let bet = parseInt(document.getElementById('wagerAmount').value);
+            if(balance < bet) { alert("Nie masz tylu punktów!"); return; }
+            myWager = bet; myReady = !myReady; conn.send({type: 'ready', state: myReady}); updateReadyUI();
+            if(isHost && myReady && oppReady) { conn.send({type: 'startCountdown'}); startCountdown(); }
+        }
+
+        function updateReadyUI() {
+            document.getElementById('btnReady').innerText = myReady ? "GOTOWY (Czekam...)" : "JESTEM GOTOWY";
+            document.getElementById('btnReady').style.background = myReady ? "linear-gradient(45deg, #888, #555)" : "linear-gradient(45deg, #00ffcc, #00b300)";
+        }
+
+        function startCountdown() {
+            document.getElementById('duelLobby').style.display = 'none'; document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('codeBox').style.display = 'none'; document.getElementById('gameWrapper').style.display = 'flex';
+            
+            const modeBadge = document.getElementById('modeDisplay');
+            if(gameMode === 'duel') { document.getElementById('vsHeader').style.display = 'flex'; modeBadge.innerText = `DUEL (Stawka: ${myWager*2})`; modeBadge.style.background = "#00d2ff"; } 
+            else if (gameMode === 'ranked') { document.getElementById('vsHeader').style.display = 'none'; modeBadge.innerText = "TRYB RANKED"; modeBadge.style.background = "#ffcc00"; } 
+            else { document.getElementById('vsHeader').style.display = 'none'; modeBadge.innerText = "TRYB ZWYKŁY"; modeBadge.style.background = "#888"; }
+
+            document.getElementById('countdownOverlay').style.display = 'flex';
+            let count = 3; document.getElementById('countdownText').innerText = count;
+            let cdInterval = setInterval(() => {
+                count--;
+                if(count > 0) { document.getElementById('countdownText').innerText = count; } 
+                else if(count === 0) { document.getElementById('countdownText').innerText = "START!"; } 
+                else { clearInterval(cdInterval); document.getElementById('countdownOverlay').style.display = 'none'; beginActiveGame(); }
+            }, 1000);
+        }
+
+        function startGame(mode) {
+            if(!validateUsername()) return;
+            gameMode = mode; startCountdown();
+        }
+
+        function beginActiveGame() {
+            timeLeft = 20; score = 0; combo = 0; maxCombo = 0; activeTargets = 0;
+            document.getElementById('score').innerText = score; document.getElementById('comboDisplay').innerText = combo; document.getElementById('maxComboDisplay').innerText = maxCombo;
+            if(gameMode === 'duel') { document.getElementById('duelMyScore').innerText = 0; document.getElementById('oppScore').innerText = 0; }
+            
+            timerInterval = setInterval(() => { timeLeft--; document.getElementById('timer').innerText = timeLeft; if (timeLeft <= 0) endGame(); }, 1000);
+            maintainTargets();
+        }
+
+        function maintainTargets() {
+            const diffKey = document.getElementById('diffGlobal').value; 
+            if (activeTargets < 1 && timeLeft > 0) createTarget(diffKey);
+            if(timeLeft > 0) requestAnimationFrame(maintainTargets);
+        }
+
+        function createTarget(modeTime) {
+            activeTargets++; const t = document.createElement('div'); t.className = 'target';
+            t.style.left = Math.random() * 750 + 'px'; t.style.top = Math.random() * 340 + 'px'; 
+            
+            t.onmousedown = (e) => { 
+                e.stopPropagation(); shootEffect(e); score += 1; combo += 1;
+                if(combo > maxCombo) maxCombo = combo;
+
+                document.getElementById('score').innerText = score; document.getElementById('comboDisplay').innerText = combo; document.getElementById('maxComboDisplay').innerText = maxCombo;
+                if(gameMode === 'duel') { document.getElementById('duelMyScore').innerText = score; }
+
+                activeTargets--; t.remove(); 
+                if(gameMode === 'duel' && conn) conn.send({type: 'score', value: score});
+            };
+            document.getElementById('gameArea').appendChild(t);
+            
+            setTimeout(() => { 
+                if(t.parentElement) { combo = 0; document.getElementById('comboDisplay').innerText = combo; activeTargets--; t.remove(); } 
+            }, modeTime === "impossible" ? 300 : parseInt(modeTime)); 
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            document.getElementById('gameWrapper').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+
+            if(gameMode === 'duel') {
+                let oppFinal = parseInt(document.getElementById('oppScore').innerText);
+                if(score > oppFinal) { balance += myWager; document.getElementById('duelResultText').innerText = "WYGRAŁEŚ!"; document.getElementById('duelResultText').style.color = "#00ffcc"; }
+                else if(score < oppFinal) { balance -= myWager; document.getElementById('duelResultText').innerText = "PRZEGRAŁEŚ!"; document.getElementById('duelResultText').style.color = "#ff0055"; }
+                else { document.getElementById('duelResultText').innerText = "REMIS!"; document.getElementById('duelResultText').style.color = "#ffcc00"; }
+                document.getElementById('msg').innerText = `Twój wynik: ${score} | Wynik rywala: ${oppFinal}`;
+            } else if (gameMode === 'ranked') {
+                let totalPoints = score + (maxCombo * 2); 
+                balance += totalPoints;
+                document.getElementById('duelResultText').innerText = "KONIEC RANKEDA";
+                document.getElementById('duelResultText').style.color = "#ffcc00";
+                
+                // AKTUALIZACJA I ZAPISYWANA TOPKI
+                let existingPlayer = globalLeaderboard.find(p => p.name === playerName);
+                if(existingPlayer) {
+                    if(score > existingPlayer.score) { existingPlayer.score = score; existingPlayer.maxCombo = maxCombo; }
+                } else {
+                    globalLeaderboard.push({ name: playerName, score: score, maxCombo: maxCombo });
+                }
+                
+                // Zapisujemy nowy układ Topki do LocalStorage
+                localStorage.setItem('aim_leaderboard', JSON.stringify(globalLeaderboard));
+                
+                renderLeaderboard(playerName);
+                document.getElementById('msg').innerText = `Trafienia: ${score}. Zyskałeś +${totalPoints} pkt (W tym premia za combo)!`;
+            } else {
+                balance += score; 
+                document.getElementById('duelResultText').innerText = "KONIEC TRENINGU";
+                document.getElementById('duelResultText').style.color = "white";
+                document.getElementById('msg').innerText = `Wynik: ${score} (+${score} pkt do zbrojowni).`;
+            }
+            
+            document.getElementById('comboResult').innerText = `Twoje NAJLEPSZE COMBO to: ${maxCombo}🔥`;
+            localStorage.setItem('aim_balance', balance);
+        }
+
+        equipSkin(equippedSkin); updateDesc();
+    </script>
+</body>
+</html>
